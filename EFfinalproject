@@ -1,1 +1,332 @@
+ <div id="map"></div>
+    <div class="sidebar">
+      <div class="heading">
+        <h1>Avoiding Collisions in Hamilton</h1>
+       <style>
+       
+      body {
+        color: #404040;
+        font: 400 15px/22px 'Source Sans Pro', 'Helvetica Neue', sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      #map {
+        position: absolute;
+        left: 15%;
+        top: 0;
+        bottom: 0;
+        width: 85%;
+      }
+
+      .sidebar {
+        position: absolute;
+        width: 15%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        overflow: hidden;
+        border-right: 1px solid rgba(0, 0, 0, 0.25);
+      }
+
+      h1 {
+        font-size: 22px;
+        margin: 0;
+        font-weight: 400;
+      }
+
+      a {
+        color: #404040;
+        text-decoration: none;
+      }
+
+      a:hover {
+        color: #101010;
+      }
+
+      .heading {
+        background: #C6B7C0;
+        border-bottom: 1px solid #eee;
+        min-height: 60px;
+        line-height: 60px;
+        padding: 0 10px;
+      }
+
+      .reports {
+        height: 100%;
+        overflow: auto;
+        padding-bottom: 60px;
+      }
+
+      .reports .item {
+        display: block;
+        border-bottom: 1px solid #eee;
+        padding: 10px;
+        text-decoration: none;
+      }
+
+      .reports .item:last-child {
+        border-bottom: none;
+      }
+
+      .reports .item .title {
+        display: block;
+        color: #00853e;
+        font-weight: 700;
+      }
+
+      .reports .item .warning {
+        display: block;
+        color: red;
+        font-weight: 700;
+      }
+
+      .reports .item .title small {
+        font-weight: 400;
+      }
+
+      .reports .item.active .title,
+      .reports .item .title:hover {
+        color: #8cc63f;
+      }
+
+      .reports .item.active {
+        background-color: #f8f8f8;
+      }
+
+      ::-webkit-scrollbar {
+        width: 3px;
+        height: 3px;
+        border-left: 0;
+        background: rgba(0, 0, 0, 0.1);
+      }
+
+      ::-webkit-scrollbar-track {
+        background: none;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #00853e;
+        border-radius: 0;
+      }
+    </style>
+      </div>
+      <script>
+      mapboxgl.accessToken = 'pk.eyJ1IjoiZXJpY2Fmb3JyZXN0IiwiYSI6ImNrdWNxdmdzYzEzZG0ydmxraXZ1c205OWkifQ.0JZSpy_IkDIhYNdzH8Ungw';
+      const map = new mapboxgl.Map({
+        container: 'map', 
+        style: 'mapbox://styles/ericaforrest/ckwjjiywu243r15o0zja1m8yi',
+        center: [-79.90832, 43.24802], 
+        zoom: 11 
+      });
+      const directions = new MapboxDirections({
+        accessToken: mapboxgl.accessToken,
+        unit: 'metric',
+        profile: 'mapbox/driving',
+        alternatives: 'false',
+        geometries: 'geojson'
+      });
+
+      map.scrollZoom.enable();
+      map.addControl(directions, 'top-right');
+
+      const clearances = {
+        'type': 'FeatureCollection',
+        'features': [
+          {
+            'type': 'Feature',
+            'geometry': {
+              'type': 'Point',
+              'coordinates': [-79.93856, 43.23214]
+            },
+            'properties': {
+              'clearance': "13' 2"
+            }
+          },
+          {
+            'type': 'Feature',
+            'geometry': {
+              'type': 'Point',
+              'coordinates': [-79.9636, 43.28996]
+            },
+            'properties': {
+              'clearance': "13' 7"
+            }
+          },
+          {
+            'type': 'Feature',
+            'geometry': {
+              'type': 'Point',
+              'coordinates': [-79.9888, 43.29821]
+            },
+            'properties': {
+              'clearance': "13' 7"
+            }
+          },
+          {
+            'type': 'Feature',
+            'geometry': {
+              'type': 'Point',
+              'coordinates': [-79.9660, 43.21421]
+            },
+            'properties': {
+              'clearance': "13' 7"
+            }
+          },
+          {
+            'type': 'Feature',
+            'geometry': {
+              'type': 'Point',
+              'coordinates': [-79.9522, 43.29555]
+            },
+            'properties': {
+              'clearance': "12' 0"
+            }
+          },
+          {
+            'type': 'Feature',
+            'geometry': {
+              'type': 'Point',
+              'coordinates': [-79.758, 43.3572]
+            },
+            'properties': {
+              'clearance': "13' 6"
+            }
+          },
+          {
+            'type': 'Feature',
+            'geometry': {
+              'type': 'Point',
+              'coordinates': [-79.9536, 43.3198]
+            },
+            'properties': {
+              'clearance': "13' 6"
+            }
+          },
+          {
+            'type': 'Feature',
+            'geometry': {
+              'type': 'Point',
+              'coordinates': [-79.9642, 43.32560]
+            },
+            'properties': {
+              'clearance': "11' 6"
+            }
+          }
+        ]
+      };
+
+      const obstacle = turf.buffer(clearances, 0.25, { units: 'kilometers' });
+
+      map.on('load', () => {
+        map.addLayer({
+          id: 'clearances',
+          type: 'fill',
+          source: {
+            type: 'geojson',
+            data: obstacle
+          },
+          layout: {},
+          paint: {
+            'fill-color': '#8E6F82',
+            'fill-opacity': 0.5,
+            'fill-outline-color': '#8E6F82'
+          }
+        });
+
+        for (let i = 0; i < 3; i++) {
+          map.addSource(`route${i}`, {
+            type: 'geojson',
+            data: {
+              type: 'Feature'
+            }
+          });
+
+          map.addLayer({
+            id: `route${i}`,
+            type: 'line',
+            source: `route${i}`,
+            layout: {
+              'line-join': 'round',
+              'line-cap': 'round'
+            },
+            paint: {
+              'line-color': '#cccccc',
+              'line-opacity': 0.5,
+              'line-width': 13,
+              'line-blur': 0.5
+            }
+          });
+        }
+      });
+
+      directions.on('route', (event) => {
+        const reports = document.getElementById('reports');
+        reports.innerHTML = '';
+        const report = reports.appendChild(document.createElement('div'));
+
+        const routes = event.route.map((route, index) => ({
+          ...route,
+          id: index
+        }));
+
+        for (let i = 0; i < 3; i++) {
+          map.setLayoutProperty(`route${i}`, 'visibility', 'none');
+        }
+
+        for (const route of routes) {
+          map.setLayoutProperty(`route${route.id}`, 'visibility', 'visible');
+
+          const routeLine = polyline.toGeoJSON(route.geometry);
+
+          map.getSource(`route${route.id}`).setData(routeLine);
+
+          const isClear = turf.booleanDisjoint(obstacle, routeLine) === true;
+
+          const collision = isClear ? 'is good!' : 'is bad.';
+          const emoji = isClear ? '✔️' : '⚠️';
+          const detail = isClear ? 'does not go' : 'goes';
+          report.className = isClear ? 'item' : 'item warning';
+
+          if (isClear) {
+            map.setPaintProperty(`route${route.id}`, 'line-color', '#74c476');
+          } else {
+            map.setPaintProperty(`route${route.id}`, 'line-color', '#de2d26');
+          }
+
+     
+          report.id = `report-${route.id}`;
+
+          const heading = report.appendChild(document.createElement('h3'));
+
+          heading.className = isClear ? 'title' : 'warning';
+          
+          heading.innerHTML = `${emoji} Route ${route.id + 1} ${collision}`;
+          
+          const details = report.appendChild(document.createElement('div'));
+          details.innerHTML = `This route ${detail} through an avoidance area.`;
+          report.appendChild(document.createElement('hr'));
+        }
+      });
+      </script>
+      <div id="reports" class="reports"></div>
+    </div>
+
+  
+© 2021 GitHub, Inc.
+Terms
+Privacy
+Security
+Status
+Docs
+Contact GitHub
+Pricing
+API
+Training
+Blog
+About
 
