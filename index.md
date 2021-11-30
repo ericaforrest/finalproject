@@ -1,4 +1,5 @@
-## Welcome to GitHub Pages
+##Avoiding Collisions in Hamilton - FORREST PLANNING Ltd.
+Access link to JSFiddle (https://jsfiddle.net/erica_ayla/4htcjzgk/)
 
 You can use the [editor on GitHub](https://github.com/ericaforrest/finalproject/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
 
